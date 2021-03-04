@@ -2,39 +2,59 @@
 using System.Text.Json;
 using System.IO;
 using System.Collections.Generic;
-
+using System.Threading;
 namespace Monopoly
 {
+    
     class Program
     {
+        static public IAction[] map = new IAction[40];
         static void Main(string[] args)
         {
-            /*
-            using (StreamWriter sw = new StreamWriter("D:/Data.txt"))
-            {
-                for (int i = 0; i < 3; i++)
-                {
-                    string name = Console.ReadLine();
-                    int id = int.Parse(Console.ReadLine());
-                    int price = int.Parse(Console.ReadLine());
-                    EstateField buildField = new EstateField(name, id, price);
-                    sw.WriteLine(JsonSerializer.Serialize<GameField>(buildField));                  
-                }               
-            }
-            */
-
-            List<EstateField> estates = new List<EstateField>();
+           
             using (StreamReader sr = new StreamReader("D:/Estates.txt"))
             {
                 string line;
-                while ((line = sr.ReadLine()) != null) 
+                while ((line = sr.ReadLine()) != null)
                 {
-                    estates.Add(JsonSerializer.Deserialize<EstateField>(line));
+                    EstateField estate = (JsonSerializer.Deserialize<EstateField>(line));
+                    map[estate.id] = estate;
                 }
             }
-            foreach (EstateField estate in estates)
+            using (StreamReader sr = new StreamReader("D:/TaxesFields.txt"))
             {
-                Console.WriteLine(estate);
+                string line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    TaxesFiled tax_field = (JsonSerializer.Deserialize<TaxesFiled>(line));
+                    map[tax_field.id] = tax_field;
+                }
+            }
+
+            Player player_1 = new Player("Bot John");
+            Player player_2 = new Player("Bot Gabe");
+            try
+            {
+                while (true)
+                {
+                    Console.Clear();
+                    player_1.PrintInfo();
+                    player_2.PrintInfo();
+                    player_1.Move();
+                    Thread.Sleep(2000);
+                    Console.WriteLine();
+                    player_2.Move();
+                    Thread.Sleep(2000);
+                }
+            }
+            catch (NotEnoughMoneyException e)
+            {
+                Console.Clear();
+                Console.WriteLine(e.Message);
+                Console.WriteLine($"{e.player.name} lost");
+                Console.WriteLine("GAME STATISTIC");
+                player_1.PrintInfo();
+                player_2.PrintInfo();
             }
         } 
     }

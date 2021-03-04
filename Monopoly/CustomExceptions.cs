@@ -6,7 +6,11 @@ namespace Monopoly
 {
     class NotEnoughMoneyException : Exception
     {
-        public NotEnoughMoneyException()
-            :base() { }
+        public Player player;
+        public NotEnoughMoneyException(Player player, string msg)
+            :base(msg)
+        {
+            this.player = player;
+        }
     }
 }
