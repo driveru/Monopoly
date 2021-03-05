@@ -30,6 +30,14 @@ namespace Monopoly
                     map[tax_field.id] = tax_field;
                 }
             }
+            using (StreamReader sr = new StreamReader("D:/ChanceFields.txt"))
+            {
+                string line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    map[int.Parse(line)] = new ChanceField(int.Parse(line));
+                }
+            }
 
             Player player_1 = new Player("Bot John");
             Player player_2 = new Player("Bot Gabe");
@@ -41,10 +49,10 @@ namespace Monopoly
                     player_1.PrintInfo();
                     player_2.PrintInfo();
                     player_1.Move();
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1000);
                     Console.WriteLine();
                     player_2.Move();
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1000);
                 }
             }
             catch (NotEnoughMoneyException e)
