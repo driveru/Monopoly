@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Monopoly
 {
-    class MonopolyLevelComparer : IComparer<EstateField>
+    class MonopolyLevelComparer : IComparer<EstateCell>
     {
-        public int Compare([AllowNull] EstateField x, [AllowNull] EstateField y)
+        public int Compare([AllowNull] EstateCell x, [AllowNull] EstateCell y)
         {
             return x.monopoly_level.CompareTo(y.monopoly_level);
         }

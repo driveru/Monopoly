@@ -4,16 +4,16 @@ using System.Text;
 
 namespace Monopoly
 {
-    class JailField : GameField
+    class FreeCell : Square
     {
-        public JailField()
+        public FreeCell(int id)
         {
-            label = "Jail";
-            id = 30;
+            this.id = id;
+            this.label = "Free Cell";
         }
         public override void Action(Player player)
         {
-            player.GoToJail();
+            Console.WriteLine("Nothing happened");
         }
     }
 }

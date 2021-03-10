@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Monopoly
 {
-    abstract class GameField : IAction
+    abstract class Square : IAction
     {
         public abstract void Action(Player player);
         public string label { get; set; }

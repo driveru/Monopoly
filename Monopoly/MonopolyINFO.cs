@@ -10,10 +10,10 @@ namespace Monopoly
         public int house_price { get; set; }
         public int key { get; set; }
         public double rent_multiplier { get; set; }
-        public List<EstateField> monopoly_estates;
+        public List<EstateCell> monopoly_estates;
         public void UpToMonopoly()
         {
-            foreach (EstateField estate in this.monopoly_estates)
+            foreach (EstateCell estate in this.monopoly_estates)
                 estate.UpEstateLevel();
         }
         public void BuildField()
@@ -29,7 +29,7 @@ namespace Monopoly
             monopoly_estates.Reverse();
             if (monopoly_estates[0].monopoly_level == 1)
             {
-                foreach (EstateField estate in monopoly_estates)
+                foreach (EstateCell estate in monopoly_estates)
                 {
                     estate.DownEstateLevel();
                 }

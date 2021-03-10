@@ -4,13 +4,16 @@ using System.Text;
 
 namespace Monopoly
 {
-    class TaxesFiled : GameField
+    class JailCell : Square
     {
-        public int tax { get; set; }
-        public TaxesFiled() { }
+        public JailCell()
+        {
+            label = "Jail";
+            id = 30;
+        }
         public override void Action(Player player)
         {
-            player.PayTaxes(tax);
+            player.GoToJail();
         }
     }
 }

@@ -4,10 +4,10 @@ using System.Text;
 
 namespace Monopoly
 {
-    class EstateField : GameField, IComparable
+    class EstateCell : Square, IComparable
     {
-        static public ConsoleColor[] colors = { ConsoleColor.DarkYellow, ConsoleColor.Cyan, ConsoleColor.Magenta, ConsoleColor.Red,
-                                                ConsoleColor.DarkRed, ConsoleColor.DarkYellow, ConsoleColor.DarkGreen, ConsoleColor.DarkBlue };
+        static public ConsoleColor[] colors = { ConsoleColor.DarkYellow, ConsoleColor.Cyan, ConsoleColor.Magenta, ConsoleColor.Red, ConsoleColor.DarkRed, 
+                                                ConsoleColor.DarkCyan, ConsoleColor.DarkGreen, ConsoleColor.DarkBlue, ConsoleColor.DarkMagenta };
         private int _baseRent; 
         public bool IsBought { get; set; }
         public int price { get; set; }
@@ -23,7 +23,7 @@ namespace Monopoly
         }
         public int monopoly_key { get; set; }
         public int monopoly_level { get; set; }
-        public EstateField() { }
+        public EstateCell() { }
         public override string ToString()
         {
             return $"{id}) {label}, price: {price}, rent: {rent}, level: {monopoly_level}";
@@ -46,7 +46,7 @@ namespace Monopoly
         }
         public int CompareTo(object obj)
         {
-            EstateField other_estate = obj as EstateField;
+            EstateCell other_estate = obj as EstateCell;
             return this.id.CompareTo(other_estate.id);
         }
         public void UpEstateLevel()

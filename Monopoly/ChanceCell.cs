@@ -4,9 +4,9 @@ using System.Text;
 
 namespace Monopoly
 {
-    class ChanceField : GameField
+    class ChanceCell : Square
     {
-        public ChanceField(int id)
+        public ChanceCell(int id)
         {
             this.label = "Chance Field";
             this.id = id;
@@ -14,7 +14,7 @@ namespace Monopoly
         public override void Action(Player player)
         {
             Random rnd = new Random();
-            int x = rnd.Next(11);
+            int x = rnd.Next(12);
             if (x < 5)
             {
                 player.PayTaxes(250 * (x + 1));
@@ -23,10 +23,15 @@ namespace Monopoly
             {
                 player.ReciveMoney(250 * (x - 4));
             }
-            else
+            else if (x < 11)
             {
                 Console.WriteLine($"{player.name} tests a teleportation!");
                 player.Move();
+            }
+            else
+            {
+                Console.WriteLine($"{player.name} takes a nap!");
+                player.BlockMove(1);
             }
         }
     }
