@@ -8,7 +8,7 @@ namespace Monopoly
     {
         private Die[] dice { get; set; }
         public string name { get; set; }
-        private List<EstateCell> estates { get; set; }
+        private List<int> estate_ids { get; set; }
         private int money { get; set; }
         private IAction current_position { get; set; }
         private int movement_block { get; set; }
@@ -19,9 +19,10 @@ namespace Monopoly
             this.name = name;
             this.money = 15000;
             current_position = Game.board.GetSquare(0);
-            estates = new List<EstateCell>();
+            estate_ids = new List<int>();
             dice = new[] { new Die(), new Die() };
         }
+        
         public void PayRent(Player other_player, int amount)
         {
             if (this.money < amount)
@@ -35,6 +36,7 @@ namespace Monopoly
             other_player.IncreaseScore(amount);
             this.money -= amount;        
         }
+        
         public void PayTaxes(int tax_amount)
         {
             if (this.money < tax_amount)
@@ -46,6 +48,7 @@ namespace Monopoly
             Console.WriteLine($"{this.name} paid {tax_amount}$ to treasury!");
             Console.ResetColor();
         }
+        
         public void Move()
         {
             // roll dice
@@ -86,9 +89,9 @@ namespace Monopoly
                     this.ReciveMoney(2000);
                 }
 
-                current_position = Game.board.GetSquare((current_position.id + step) % 40);
+                current_position = Game.board.GetSquare(current_position, step);
 
-                Console.WriteLine($"{this.name} enters the {current_position.label} field!");
+                Console.WriteLine($"{this.name} enters the {(current_position).GetLabel()} field!");
                 current_position.Action(this);
                 BuildMonopoly();
 
@@ -96,35 +99,33 @@ namespace Monopoly
                     this.Move();
             }
         }
+        
         public void Buy(EstateCell estate)
         {
-            if (estate.price > money)
+            if (estate.Buy(this, this.money))
             {
-                Console.WriteLine($"{this.name} haven't enough money to buy {estate.label}");
+                money -= estate.GetPrice();
+                estate_ids.Add(estate.id);
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"{this.name} bought {estate.GetLabel()}");
+                Console.ResetColor();
+                if (IsMonopoly(estate))
+                    estate.GetMonopolyINFO().UpToMonopoly();               
             }
             else
             {
-                money -= estate.price;
-                estates.Add(estate);
-                estate.IsBought = true;
-                estate.owner = this;
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"{this.name} bought {estate.label}");
-                Console.ResetColor();
-                if (IsMonopoly(estate))
-                    estate.monopolyINFO.UpToMonopoly();                  
+                Console.WriteLine($"{this.name} haven't enough money to buy {estate.GetLabel()}");
             }
         }
+        
         private int Sell(int need_money)
         {
-            List<EstateCell> estates_for_sale = FindEstatesToSell(need_money);
+            List<int> estate_ids_for_sale = FindEstatesToSell(need_money);
             int got_money = 0;
-            foreach (EstateCell estate in estates_for_sale)
-            {
-                estate.IsBought = false;
-                estate.owner = null;
-                got_money += (int)Math.Round(estate.price * 0.7);               
-                this.estates.Remove(estate);
+            foreach (int estate_id in estate_ids_for_sale)
+            { 
+                got_money += (Game.board.GetSquare(estate_id) as MonopolyComponent).Sell();               
+                this.estate_ids.Remove(estate_id);
             }
             if (got_money >= need_money)
             {
@@ -136,6 +137,7 @@ namespace Monopoly
             }
             return got_money;
         }
+        
         public void ReciveMoney(int got_money)
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -149,15 +151,16 @@ namespace Monopoly
             movement_block = 3;
             current_position = Game.board.GetSquare(10);
         }
+        
         private void BuildMonopoly()
         {
             List<MonopolyINFO> monopolies = new List<MonopolyINFO>(); 
-            foreach (EstateCell estate in this.estates)
+            foreach (int estate_id in this.estate_ids)
             {
-                if (estate.monopoly_level > 0)
+                if ((Game.board.GetSquare(estate_id) as MonopolyComponent).GetLevel() > 0)
                 {
-                    if (!monopolies.Contains(estate.monopolyINFO))
-                        monopolies.Add(estate.monopolyINFO);
+                    if (!monopolies.Contains((Game.board.GetSquare(estate_id) as MonopolyComponent).GetMonopolyINFO()))
+                        monopolies.Add((Game.board.GetSquare(estate_id) as MonopolyComponent).GetMonopolyINFO());
                 }
             }
             foreach (MonopolyINFO monopoly in monopolies)
@@ -169,46 +172,49 @@ namespace Monopoly
                 }
             }
         }
+        
         private bool IsMonopoly(EstateCell estate)
         {
-            foreach (EstateCell monopoly_estate in estate.monopolyINFO.monopoly_estates)
+            foreach (int monopoly_estate in estate.GetMonopolyINFO().monopoly_estates_ids)
             {
-                if (!this.estates.Contains(monopoly_estate))
+                if (!this.estate_ids.Contains(monopoly_estate))
                 {
                     return false;
                 }
             }
             return true;
         }
-        private List<EstateCell> FindEstatesToSell(int need_money)
+       
+        private List<int> FindEstatesToSell(int need_money)
         {
-            List<EstateCell> estates_to_sell = new List<EstateCell>();
+            List<int> estates_to_sell = new List<int>();
             double sum = 0;
-            estates.Sort(new MonopolyLevelComparer());
-            foreach (EstateCell estate in estates)
+            estate_ids.Sort();
+            foreach (int estate_id in estate_ids)
             {
-                if (estate.monopoly_level == 0)
+                if ((Game.board.GetSquare(estate_id) as MonopolyComponent).GetLevel() == 0)
                 {
                     if (sum < need_money)
                     {
-                        sum += Math.Round(estate.price * 0.7);
-                        estates_to_sell.Add(estate);
+                        sum += (Game.board.GetSquare(estate_id) as MonopolyComponent).GetSellPrice();
+                        estates_to_sell.Add(estate_id);
                     }
-                }
-                else
-                {
-                    break;
-                }
+                    else
+                    {
+                        break;
+                    }
+                }           
             }
-            estates.Sort();
+            estate_ids.Sort();
             return estates_to_sell;
         }
+        
         private int SellMonopoly(int need_money)
         {
             int got_money = 0;
-            while ((estates.Count > 0) && (got_money < need_money))
+            while ((estate_ids.Count > 0) && (got_money < need_money))
             {
-                int money_for_sale = estates[0].monopolyINFO.SellHouse();
+                int money_for_sale = (Game.board.GetSquare(estate_ids[0]) as MonopolyComponent).GetMonopolyINFO().SellHouse();
                 if (money_for_sale == 0)
                 {
                     got_money += Sell(need_money - got_money);
@@ -224,15 +230,16 @@ namespace Monopoly
             }
             return got_money;
         }
+        
         public void PrintInfo()
         {
             Console.WriteLine($"Player: {name}, money: {money}, current position: {current_position.id}, score: {score}");
             Console.WriteLine("Estates:");
-            estates.Sort();
-            foreach (EstateCell estate in estates)
+            estate_ids.Sort();
+            foreach (int estate_id in estate_ids)
             {
-                Console.ForegroundColor = EstateCell.colors[estate.monopoly_key - 1];
-                Console.WriteLine(estate);
+                Console.ForegroundColor = EstateCell.colors[(Game.board.GetSquare(estate_id) as MonopolyComponent).GetMonopolyKey() - 1];
+                Console.WriteLine(Game.board.GetSquare(estate_id));
                 Console.ResetColor();
             }
             Console.WriteLine("--------------------------------------------------------------------");

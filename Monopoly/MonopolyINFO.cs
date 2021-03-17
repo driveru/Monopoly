@@ -10,36 +10,46 @@ namespace Monopoly
         public int house_price { get; set; }
         public int key { get; set; }
         public double rent_multiplier { get; set; }
-        public List<EstateCell> monopoly_estates;
+        public List<int> monopoly_estates_ids;
         public void UpToMonopoly()
         {
-            foreach (EstateCell estate in this.monopoly_estates)
-                estate.UpEstateLevel();
+            Game.board.UpToMonopoly(monopoly_estates_ids);
         }
+        
         public void BuildField()
         {
-            monopoly_estates.Sort(new MonopolyLevelComparer());
-            if (monopoly_estates[0].monopoly_level < 6)
-                monopoly_estates[0].UpEstateLevel();
+            List<MonopolyComponent> monopoly_squares = new List<MonopolyComponent>();
+            foreach (int id in monopoly_estates_ids)
+            {
+                monopoly_squares.Add(Game.board.GetSquare(id) as MonopolyComponent);
+            }
+            monopoly_squares.Sort(new MonopolyLevelComparer());
+            if (monopoly_squares[0].GetLevel() < 6)
+            {
+                Game.board.BuildField(monopoly_squares[0].id);
+            }
         }
         public int SellHouse()
         {
             int got_money = 0;
-            monopoly_estates.Sort(new MonopolyLevelComparer());
-            monopoly_estates.Reverse();
-            if (monopoly_estates[0].monopoly_level == 1)
+            List<MonopolyComponent> monopoly_squares = new List<MonopolyComponent>();
+            foreach (int id in monopoly_estates_ids)
             {
-                foreach (EstateCell estate in monopoly_estates)
-                {
-                    estate.DownEstateLevel();
-                }
+                monopoly_squares.Add(Game.board.GetSquare(id) as MonopolyComponent);
+            }
+            monopoly_squares.Sort(new MonopolyLevelComparer());
+            monopoly_squares.Reverse();
+            if (monopoly_squares[0].GetLevel() == 1)
+            {
+                Game.board.DownToEstates(monopoly_estates_ids);
             }
             else
             {
-                monopoly_estates[0].DownEstateLevel();
+                Game.board.BreakHouse(monopoly_squares[0].id);
                 got_money += house_price;
             }
             return got_money;
         }
+        
     }
 }

@@ -8,7 +8,7 @@ namespace Monopoly
     class Board
     {
         private const int boardSize = 40;
-        private IAction[] squares = new IAction[boardSize];
+        private static IAction[] squares = new IAction[boardSize];
         
         public Board()
         {
@@ -19,7 +19,7 @@ namespace Monopoly
                 while ((line = sr.ReadLine()) != null)
                 {
                     MonopolyINFO monopoly_info = (JsonSerializer.Deserialize<MonopolyINFO>(line));
-                    monopoly_info.monopoly_estates = new List<EstateCell>();
+                    monopoly_info.monopoly_estates_ids = new List<int>();
                     monopolies.Add(monopoly_info);
                 }
             }
@@ -29,12 +29,12 @@ namespace Monopoly
                 while ((line = sr.ReadLine()) != null)
                 {
                     EstateCell estate = (JsonSerializer.Deserialize<EstateCell>(line));
-                    squares[estate.id] = estate;
+                    squares[estate.id] = new NotMonopoly(estate);
                     foreach (MonopolyINFO mon in monopolies)
                     {
                         if (mon.key == estate.monopoly_key)
                         {
-                            mon.monopoly_estates.Add(estate);
+                            mon.monopoly_estates_ids.Add(estate.id);
                             estate.monopolyINFO = mon;
                         }
                     }
@@ -57,7 +57,7 @@ namespace Monopoly
                     squares[int.Parse(line)] = new ChanceCell(int.Parse(line));
                 }
             }
-            squares[30] = new JailCell();
+            squares[30] = new GoToJailCell();
             squares[0] = new StartCell();
 
             for (int i = 0; i < boardSize; i++)
@@ -70,5 +70,31 @@ namespace Monopoly
         {
             return squares[id];
         }
+        public IAction GetSquare(IAction current_position, int step)
+        {
+            return squares[(current_position.id + step) % 40];
+        }
+        public void BuildField(int id)
+        {          
+            squares[id] = new Houses(squares[id] as Decorator);
+        }
+        public void BreakHouse(int id)
+        {
+            squares[id] = (squares[id] as Decorator).GetComponent();
+        }
+        public void UpToMonopoly(List<int> ids)
+        {
+            foreach (int id in ids)
+            {
+                squares[id] = new UpToMonopoly(squares[id] as Decorator);
+            }
+        }
+        public void DownToEstates(List<int> ids)
+        {
+            foreach (int id in ids)
+            {
+                squares[id] = (squares[id] as Decorator).GetComponent();
+            }
+        }      
     }
 }

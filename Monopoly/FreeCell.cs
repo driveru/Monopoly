@@ -4,16 +4,22 @@ using System.Text;
 
 namespace Monopoly
 {
-    class FreeCell : Square
+    class FreeCell : IAction
     {
+        public string label { get; set; }
+        public int id { get; set ; }
         public FreeCell(int id)
         {
             this.id = id;
             this.label = "Free Cell";
         }
-        public override void Action(Player player)
+        public void Action(Player player)
         {
             Console.WriteLine("Nothing happened");
+        }
+        public string GetLabel()
+        {
+            return label;
         }
     }
 }

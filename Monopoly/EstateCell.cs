@@ -4,29 +4,15 @@ using System.Text;
 
 namespace Monopoly
 {
-    class EstateCell : Square, IComparable
+    class EstateCell : MonopolyComponent, IComparable
     {
         static public ConsoleColor[] colors = { ConsoleColor.DarkYellow, ConsoleColor.Cyan, ConsoleColor.Magenta, ConsoleColor.Red, ConsoleColor.DarkRed, 
                                                 ConsoleColor.DarkCyan, ConsoleColor.DarkGreen, ConsoleColor.DarkBlue, ConsoleColor.DarkMagenta };
-        private int _baseRent; 
-        public bool IsBought { get; set; }
-        public int price { get; set; }
-        public Player owner { get; set; }
-        public MonopolyINFO monopolyINFO;
-        public int rent 
-        { 
-            get 
-            {
-                return (int)(_baseRent * Math.Pow(monopolyINFO.rent_multiplier, monopoly_level));
-            }
-            set { _baseRent = value; } 
-        }
-        public int monopoly_key { get; set; }
-        public int monopoly_level { get; set; }
+        public int _baseRent { get; set; }
         public EstateCell() { }
         public override string ToString()
         {
-            return $"{id}) {label}, price: {price}, rent: {rent}, level: {monopoly_level}";
+            return $"{GetId()}) {GetLabel()}, price: {GetPrice()}, rent: {GetRent()}, level: {GetLevel()}";
         }
         public override void Action(Player player)
         {
@@ -34,7 +20,7 @@ namespace Monopoly
             {
                 if (player != owner)
                 {
-                    player.PayRent(owner, rent);
+                    player.PayRent(owner, GetRent());
                 }
                 else
                 {
@@ -49,19 +35,62 @@ namespace Monopoly
             EstateCell other_estate = obj as EstateCell;
             return this.id.CompareTo(other_estate.id);
         }
-        public void UpEstateLevel()
+        public bool Buy(Player player, int player_money)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"{owner.name} builds {this.label}, rent grows UP !");
-            Console.ResetColor();
-            monopoly_level++;
+            bool successful = false;
+            if (player_money >= this.price)
+            {
+                owner = player;
+                successful = true;
+                this.IsBought = true;
+            }
+            return successful;
         }
-        public void DownEstateLevel()
+        public override int Sell()
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"{owner.name} breaks down {this.label}, rent reduced !");
-            Console.ResetColor();
-            monopoly_level--;
+            this.IsBought = false;
+            this.owner = null;
+            return GetSellPrice();
+        }
+        public override int GetSellPrice()
+        {
+            return (int)Math.Round(this.GetPrice() * 0.7);
+        }
+        public override int GetRent()
+        {
+            return _baseRent;
+        }
+        public override int GetLevel()
+        {
+            return 0;
+        }
+        public override int GetMonopolyKey()
+        {
+            return monopoly_key;
+        }
+        public override int GetPrice()
+        {
+            return price;
+        }
+        public override int GetId()
+        {
+            return id;
+        }
+        public override string GetLabel()
+        {
+            return label;
+        }
+        public override MonopolyINFO GetMonopolyINFO()
+        {
+            return monopolyINFO;
+        }
+        public override Player GetOwner()
+        {
+            return owner;
+        }
+        public override MonopolyComponent GetComponent()
+        {
+            return this;
         }
     }
 }

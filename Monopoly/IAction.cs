@@ -9,5 +9,6 @@ namespace Monopoly
         string label { get; set; }
         int id { get; set; }
         void Action(Player player);
+        string GetLabel();
     }
 }

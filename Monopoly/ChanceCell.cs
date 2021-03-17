@@ -4,14 +4,16 @@ using System.Text;
 
 namespace Monopoly
 {
-    class ChanceCell : Square
+    class ChanceCell : IAction
     {
+        public string label { get; set; }
+        public int id { get; set; }
         public ChanceCell(int id)
         {
             this.label = "Chance Field";
             this.id = id;
         }
-        public override void Action(Player player)
+        public void Action(Player player)
         {
             Random rnd = new Random();
             int x = rnd.Next(12);
@@ -33,6 +35,11 @@ namespace Monopoly
                 Console.WriteLine($"{player.name} takes a nap!");
                 player.BlockMove(1);
             }
+        }
+
+        public string GetLabel()
+        {
+            return label;
         }
     }
 }

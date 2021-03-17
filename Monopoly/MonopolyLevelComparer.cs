@@ -5,11 +5,12 @@ using System.Text;
 
 namespace Monopoly
 {
-    class MonopolyLevelComparer : IComparer<EstateCell>
+    
+    class MonopolyLevelComparer : IComparer<MonopolyComponent>
     {
-        public int Compare([AllowNull] EstateCell x, [AllowNull] EstateCell y)
+        public int Compare([AllowNull] MonopolyComponent x, [AllowNull] MonopolyComponent y)
         {
-            return x.monopoly_level.CompareTo(y.monopoly_level);
-        }
+            return x.GetLevel().CompareTo(y.GetLevel());
+        }     
     }
 }

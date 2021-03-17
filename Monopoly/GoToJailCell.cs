@@ -4,16 +4,18 @@ using System.Text;
 
 namespace Monopoly
 {
-    class TaxesCell : IAction
+    class GoToJailCell : IAction
     {
-        public int tax { get; set; }
         public string label { get; set; }
         public int id { get; set; }
-
-        public TaxesCell() { }
+        public GoToJailCell()
+        {
+            label = "Jail";
+            id = 30;
+        }
         public void Action(Player player)
         {
-            player.PayTaxes(tax);
+            player.GoToJail();
         }
         public string GetLabel()
         {

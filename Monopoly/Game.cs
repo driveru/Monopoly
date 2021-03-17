@@ -8,7 +8,7 @@ namespace Monopoly
 {
     class Game
     {
-        static public Board board;
+        static public Board board { get; private set; }
         static public Player[] players = new Player[2];
         public Game()
         {
@@ -33,7 +33,7 @@ namespace Monopoly
                     foreach (Player player in players)
                     {
                         player.Move();
-                        Thread.Sleep(1000);
+                        Thread.Sleep(100);
                         Console.WriteLine();
                     }
                 }
